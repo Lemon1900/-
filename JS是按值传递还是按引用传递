@@ -18,3 +18,5 @@ JS中的基本类型按值传递，对象类型按共享传递的 call by sharin
 
 以上结束针对对象的属性是基本类型的情况，但是参数对象属性是对象呢？？？
 后续
+
+reference：https://en.wikipedia.org/wiki/Evaluation_strategy#Call_by_reference

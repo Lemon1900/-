@@ -262,4 +262,174 @@ public static byte[] generateProxyClass(final String name,
        return classFile;  
  }  
  
- 
+ 由谁来调用InvocationHandler的invoke方法的。要解决这个问题就要看一下JDK到底为我们生成了一个什么东西。
+ 用以下代码可以获取到JDK为我们生成的字节码并写到硬盘中。
+ /** 
+ * 代理类的生成工具 
+ * @author zyb 
+ * @since 2012-8-9 
+ */  
+public class ProxyGeneratorUtils {  
+  
+    /** 
+     * 把代理类的字节码写到硬盘上 
+     * @param path 保存路径 
+     */  
+    public static void writeProxyClassToHardDisk(String path) {  
+        // 第一种方法，这种方式在刚才分析ProxyGenerator时已经知道了  
+        // System.getProperties().put("sun.misc.ProxyGenerator.saveGeneratedFiles", true);  
+          
+        // 第二种方法  
+          
+        // 获取代理类的字节码  
+        byte[] classFile = ProxyGenerator.generateProxyClass("$Proxy11", UserServiceImpl.class.getInterfaces());  
+          
+        FileOutputStream out = null;  
+          
+        try {  
+            out = new FileOutputStream(path);  
+            out.write(classFile);  
+            out.flush();  
+        } catch (Exception e) {  
+            e.printStackTrace();  
+        } finally {  
+            try {  
+                out.close();  
+            } catch (IOException e) {  
+                e.printStackTrace();  
+            }  
+        }  
+    }  
+}  
+  
+package dynamic.proxy;   
+  
+import org.junit.Test;  
+  
+/** 
+ * 动态代理测试类 
+ * @author zyb 
+ * @since 2012-8-9 
+ * 
+ */  
+public class ProxyTest {  
+  
+    @Test  
+    public void testProxy() throws Throwable {  
+        // 实例化目标对象  
+        UserService userService = new UserServiceImpl();  
+          
+        // 实例化InvocationHandler  
+        MyInvocationHandler invocationHandler = new MyInvocationHandler(userService);  
+          
+        // 根据目标对象生成代理对象  
+        UserService proxy = (UserService) invocationHandler.getProxy();  
+          
+        // 调用代理对象的方法  
+        proxy.add();  
+          
+    }  
+      
+    @Test  
+    public void testGenerateProxyClass() {  
+        ProxyGeneratorUtils.writeProxyClassToHardDisk("F:/$Proxy11.class");  
+    }  
+}  
+
+通过以上代码，就可以在F盘上生成一个$Proxy.class文件了，现在用反编译工具来看一下这个class文件里面的内容
+ublic final class $Proxy11 extends Proxy  
+    implements UserService  
+{  
+  
+    // 构造方法，参数就是刚才传过来的MyInvocationHandler类的实例  
+    public $Proxy11(InvocationHandler invocationhandler)  
+    {  
+        super(invocationhandler);  
+    }  
+  
+    public final boolean equals(Object obj)  
+    {  
+        try  
+        {  
+            return ((Boolean)super.h.invoke(this, m1, new Object[] {  
+                obj  
+            })).booleanValue();  
+        }  
+        catch(Error _ex) { }  
+        catch(Throwable throwable)  
+        {  
+            throw new UndeclaredThrowableException(throwable);  
+        }  
+    }  
+  
+    /** 
+     * 这个方法是关键部分 
+     */  
+    public final void add()  
+    {  
+        try  
+        {  
+            // 实际上就是调用MyInvocationHandler的public Object invoke(Object proxy, Method method, Object[] args)方法，第二个问题就解决了  
+            super.h.invoke(this, m3, null);  
+            return;  
+        }  
+        catch(Error _ex) { }  
+        catch(Throwable throwable)  
+        {  
+            throw new UndeclaredThrowableException(throwable);  
+        }  
+    }  
+  
+    public final int hashCode()  
+    {  
+        try  
+        {  
+            return ((Integer)super.h.invoke(this, m0, null)).intValue();  
+        }  
+        catch(Error _ex) { }  
+        catch(Throwable throwable)  
+        {  
+            throw new UndeclaredThrowableException(throwable);  
+        }  
+    }  
+  
+    public final String toString()  
+    {  
+        try  
+        {  
+            return (String)super.h.invoke(this, m2, null);  
+        }  
+        catch(Error _ex) { }  
+        catch(Throwable throwable)  
+        {  
+            throw new UndeclaredThrowableException(throwable);  
+        }  
+    }  
+  
+    private static Method m1;  
+    private static Method m3;  
+    private static Method m0;  
+    private static Method m2;  
+  
+    // 在静态代码块中获取了4个方法：Object中的equals方法、UserService中的add方法、Object中的hashCode方法、Object中toString方法  
+    static   
+    {  
+        try  
+        {  
+            m1 = Class.forName("java.lang.Object").getMethod("equals", new Class[] {  
+                Class.forName("java.lang.Object")  
+            });  
+            m3 = Class.forName("dynamic.proxy.UserService").getMethod("add", new Class[0]);  
+            m0 = Class.forName("java.lang.Object").getMethod("hashCode", new Class[0]);  
+            m2 = Class.forName("java.lang.Object").getMethod("toString", new Class[0]);  
+        }  
+        catch(NoSuchMethodException nosuchmethodexception)  
+        {  
+            throw new NoSuchMethodError(nosuchmethodexception.getMessage());  
+        }  
+        catch(ClassNotFoundException classnotfoundexception)  
+        {  
+            throw new NoClassDefFoundError(classnotfoundexception.getMessage());  
+        }  
+    }  
+}  

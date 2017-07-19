@@ -564,3 +564,12 @@ BIO 即阻塞 I/O，不管是磁盘 I/O 还是网络 I/O，数据在写入 Outpu
 另外一种情况是，我们需要让每个客户端的请求在服务端可能需要访问一些竞争资源，由于这些客户端是在不同线程中，因此需要同步，
 而往往要实现这些同步操作要远远比用单线程复杂很多。以上这些情况都说明，我们需要另外一种新的 I/O 操作方式---NIO
 NIO 的工作方式以后详细介绍。
+
+
+三、设计模式：
+io中的适配器模式
+通过使用Adatper模式，可以使得通常因为接口不兼容而不能在一起工作的类工作在一起，做法是将类自己的接口包裹在一个已存在的类中。
+Adatper持有Adatpee，使得Client调用Adatper实现操作，而Adatper的实现过程是通过Adatpee来搞定的。
+由于InputStream是字节流不能享受到字符流读取字符那么便捷的功能，因此借助
+InputStreamReader将其转为Reader子类，因此可以拥有便捷操作文本文件方法。
+public InputStreamReader(InputStream in)

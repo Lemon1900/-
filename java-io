@@ -179,4 +179,96 @@ OutputStream output = new FileOutputStream("c:\\data\\output-text.txt");//overwr
 OutputStream output = new FileOutputStream("c:\\data\\output-text.txt", true); //appends to file
 OutputStream output = new FileOutputStream("c:\\data\\output-text.txt", false); //overwrites file
 
+ByteArrayInputStream
+ByteArrayOutputStream
+ByteArrayInputStream允许你从字节数组中读取字节流数据
+eg:
+byte[] bytes = ... //get byte array from somewhere.
+InputStream input = new ByteArrayInputStream(bytes);
+int data = input.read();
+while(data != -1) {
+    //do something with data
+    data = input.read();
+}
+input.close();
+
+ByteArrayOutputStream允许你以数组的形式获取写入到该输出流中的数据
+ByteArrayOutputStream output = new ByteArrayOutputStream();
+//write data to output stream
+byte[] bytes = output.toByteArray();
+
+
+BufferedInputStream
+BufferedOutputStream
+BufferedInputStream能为输入流提供缓冲区，能提高很多IO的速度。
+你可以一次读取一大块的数据，而不需要每次从网络或者磁盘中一次读取一个字节。特别是在访问大量磁盘数据时，缓冲通常会让IO快上许多。
+为了给你的输入流加上缓冲，你需要把输入流包装到BufferedInputStream中.
+InputStream input = new BufferedInputStream(new FileInputStream("c:\\data\\input-file.txt"));
+很简单.你可以给BufferedInputStream的构造函数传递一个值，设置内部使用的缓冲区设置大小(译者注：默认缓冲区大小8 * 1024B)，就像这样：
+InputStream input = new BufferedInputStream(new FileInputStream("c:\\data\\input-file.txt"), 8 * 1024);
+这个例子设置了8KB的缓冲区。最好把缓冲区大小设置成1024字节的整数倍，这样能更高效地利用内置缓冲区的磁盘。
+除了能够为输入流提供缓冲区以外，其余方面BufferedInputStream基本与InputStream类似
+
+与BufferedInputStream类似，BufferedOutputStream可以为输出流提供缓冲区。可以构造一个使用默认大小缓冲区的BufferedOutputStream(译者注：默认缓冲区大小8 * 1024B)
+
+
+DataInputStream
+DataOutputStream
+DataInputStream可以使你从输入流中读取Java基本类型数据，而不必每次读取字节数据。
+你可以把InputStream包装到DataInputStream中，然后就可以从此输入流中读取基本类型数据了
+DataInputStream input = new DataInputStream(new FileInputStream("binary.data"));
+int aByte = input.read();
+int anInt = input.readInt();
+float aFloat = input.readFloat();
+double aDouble = input.readDouble();//etc.
+input.close();
+
+DataOutputStream可以往输出流中写入Java基本类型数据，例子如下：
+DataOutputStream output = new DataOutputStream(new FileOutputStream("binary.data"));
+output.write(45);
+//byte data output.writeInt(4545);
+//int data output.writeDouble(109.123);
+//double data  output.close();
+
+ObjectInputStream
+ObjectOutputStream
+ObjectInputStream能够让你从输入流中读取Java对象，而不需要每次读取一个字节。
+你可以把InputStream包装到ObjectInputStream中，然后就可以从中读取对象了
+bjectInputStream input = new ObjectInputStream(new FileInputStream("object.data"));
+MyClass object = (MyClass) input.readObject(); //etc.
+input.close();
+在这个例子中，你读取的对象必须是MyClass的一个实例，并且必须事先通过ObjectOutputStream序列化到“object.data”文件中
+
+ObjectOutputStream能够让你把对象写入到输出流中，而不需要每次写入一个字节。
+你可以把OutputStream包装到ObjectOutputStream中，然后就可以把对象写入到该输出流中了。
+ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream("object.data"));
+MyClass object = new MyClass();  output.writeObject(object); //etc.
+output.close();
+例子中序列化的对象object现在可以从ObjectInputStream中读取了。
+
+
+Reader 
+Writer
+Reader是Java IO中所有Reader的基类。
+Reader与InputStream类似，不同点在于，Reader基于字符而非基于字节。
+换句话说，Reader用于读取文本，而InputStream用于读取原始字节。
+Reader通常与文件、字符数组、网络等数据源相关联.
+Java内部使用UTF8编码表示字符串。
+输入流中一个字节可能并不等同于一个UTF8字符。如果你从输入流中以字节为单位读取UTF8编码的文本，并且尝试将读取到的字节转换成字符，你可能会得不到预期的结果。
+
+read()方法返回一个包含了读取到的字符内容的int类型变量(译者注：0~65535)。如果方法返回-1，表明Reader中已经没有剩余可读取字符，此时可以关闭Reader。
+-1是一个int类型，不是byte或者char类型，这是不一样的。
+你通常会使用Reader的子类，而不会直接使用Reader。Reader的子类包括InputStreamReader，CharArrayReader，FileReader等等。
+
+Writer是Java IO中所有Writer的基类。
+与Reader和InputStream的关系类似，Writer基于字符而非基于字节，Writer用于写入文本，OutputStream用于写入字节。
+同样，你最好使用Writer的子类，不需要直接使用Writer，因为子类的实现更加明确，更能表现你的意图。
+常用子类包括OutputStreamWriter，CharArrayWriter，FileWriter等。
+Writer的write(int c)方法，会将传入参数的低16位写入到Writer中，忽略高16位的数据。
+
+
+
+
+
+
 

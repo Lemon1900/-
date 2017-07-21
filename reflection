@@ -1,0 +1,153 @@
+在运行状态中，对于任意一个类，都能够知道这个类的所有属性和方法；对于任意一个对象，都能够调用它的任意方法和属性；
+这种动态获取信息以及动态调用对象方法的功能称为java语言的反射机制。
+换句话说，Java程序可以加载一个运行时才得知名称的class，获悉其完整构造（但不包括methods定义），并生成其对象实体、或对其fields设值、或唤起其methods。
+这种“看透class”的能力（the ability of the program to examine itself）被称为introspection（内省、内观、反省）。
+Reflection和introspection是常被并提的两个术语。
+
+java反射机制主要提供了以下功能： 
+在运行时判断任意一个对象所属的类；
+在运行时构造任意一个类的对象；
+在运行时判断任意一个类所具有的成员变量和方法；
+在运行时调用任意一个对象的方法；
+生成动态代理。
+
+Java的反射机制的实现要借助于4个类：class，Constructor，Field，Method；
+其中class代表的时类对象，
+Constructor－类的构造器对象，
+Field－类的属性对象，
+Method－类的方法对象。
+通过这四个对象我们可以粗略的看到一个类的各个组成部分。
+
+Class是Reflection故事起源。
+
+public final class Class<T> implements Serializable, 
+        java.lang.reflect.GenericDeclaration,
+        java.lang.reflect.Type,
+        java.lang.reflect.AnnotatedElement {
+     private Class() {}
+     public String toString() {
+         return ( isInterface() ? "interface " : (isPrimitive() ? "" : "class "))
+                      + getName();
+}
+上述为Class class片段。注意它的private Class() {}，意指不允许任何人经由编程方式产生Class object。是的，其object 只能由JVM 产生。
+
+
+针对任何您想探勘的类，唯有先为它产生一个Class 对象，接下来才能经由后者唤起为数十多个的Reflection APIs。
+类加载的三种方法：
+Class clazz = Class.forName("com.yano.reflect.Person");//记得写包名
+Class clazz1 = new Person().getClass();
+Class class2 = Person.class;
+
+获取类的无参构造函数，并实例化类
+Class clazz = Class.forName("com.yano.reflect.Person");
+Constructor c = clazz.getConstructor(null);
+Person p = (Person) c.newInstance(null);
+
+获取类的含参私有构造函数，并实例化类
+Class clazz = Class.forName("com.yano.reflect.Person");
+Constructor c = clazz.getDeclaredConstructor(new Class[] { String.class });
+// 由于构造函数是 private 的，所以需要屏蔽Java语言的访问检查
+c.setAccessible(true);
+Person p = (Person) c.newInstance(new Object[] { "I'm a reflect name!" });
+
+获取并调用类的无参方法
+lass clazz = Class.forName("com.yano.reflect.Person");
+Constructor c = clazz.getConstructor(null);
+Person p = (Person) c.newInstance(null);
+Method method = clazz.getMethod("fun", null);
+method.invoke(p, null);
+
+获取并调用类的含参方法
+Class clazz = Class.forName("com.yano.reflect.Person");
+Constructor c = clazz.getConstructor(null);
+Person p = (Person) c.newInstance(null);
+Method method = clazz.getMethod("fun", new Class[] { String.class });
+method.invoke(p, new Object[] { "I'm a reflect method!" });
+
+
+获取类的字段
+Class clazz = Class.forName("com.yano.reflect.Person");
+Constructor c = clazz.getDeclaredConstructor(new Class[] { String.class });
+// 由于构造函数是 private 的，所以需要获取控制权限
+c.setAccessible(true);
+Person p = (Person) c.newInstance(new Object[] { "I'm a reflect name!" });
+Field f = clazz.getField("name");
+Object value = f.get(p);
+Class type = f.getType();
+System.out.println(type);
+if (type.equals(String.class)) {
+    System.out.println((String) value);
+}
+
+
+
+
+
+作者：被称为L的男人
+链接：http://www.jianshu.com/p/53eb4e16d00e
+來源：简书
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+
+
+
+
+
+在java.lang.reflect包中有三个重要的类：
+Field：描述类的域
+Method：描述类的方法
+Constructor：描述类的构造器
+
+对于public域（包括超类成员）：
+getFields
+getMethods
+getConstructors
+
+对于其它域（包括私有和受保护的成员，不包括超类成员）：
+gettDeclaredFields
+gettDeclaredMethods
+gettDeclaredConstructors
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+在java.lang.Object 类中定义了getClass()方法，因此对于任意一个Java对象，都可以通过此方法获得对象的类型
+class是对象的抽象，对象只能拿到自己的类的某个方法或者属性；对象的抽象可以拿到类包含的一切，即属性、构造器和方法等。
+Class类是Reflection API 中的核心类，它有以下方法
+getName()：获得类的完整名字。
+getFields()：获得类的public类型的属性。
+getDeclaredFields()：获得类的所有属性。
+getMethods()：获得类的public类型的方法。
+getDeclaredMethods()：获得类的所有方法。
+getMethod(String name, Class[] parameterTypes)：获得类的特定方法，name参数指定方法的名字，parameterTypes 参数指定方法的参数类型。
+getConstructors()：获得类的public类型的构造方法。
+getConstructor(Class[] parameterTypes)：获得类的特定构造方法，parameterTypes 参数指定构造方法的参数类型。
+newInstance()：通过类的不带参数的构造方法创建这个类的一个对象。
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
